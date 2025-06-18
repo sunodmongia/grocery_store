@@ -1,0 +1,26 @@
+# ---- Python / Django ----
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+
+# Virtual‑envs
+venv/
+.env/
+.venv/
+
+# Django stuff
+*.pot
+*.pyc
+staticfiles/
+media/
+
+# Migrations (optional; keep if you want history)
+# **/migrations/*  
+# !**/migrations/__init__.py
+
+# IDE & OS noise
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
