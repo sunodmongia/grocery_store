@@ -1,4 +1,8 @@
 from django.db import models
+from django.core.files import File
+from barcode.writer import ImageWriter
+from barcode import EAN13
+import io, random
 
 
 #category is about fruits, vegetables, etc
@@ -23,7 +27,7 @@ class Product(models.Model):
     name = models.CharField(max_length=100)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
     unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True)
-    barcode = models.CharField(max_length=100, blank=True, null=True, unique=True)
+    barcode = models.CharField(max_length=13, blank=True, null=True, unique=True)
     selling_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     cost_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     quantity = models.IntegerField(default=0)
@@ -31,6 +35,28 @@ class Product(models.Model):
     
     def __str__(self):
         return self.name
+    
+    barcode_image = models.ImageField(upload_to="barcodes/", blank=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.barcode:
+            self.barcode = self._generate_unique_barcode()
+        super().save(*args, **kwargs)
+        
+        if not self.barcode_image:
+            self._generate_barcode_image()
+    def _generate_unique_barcode(self):
+        while True:
+            code = str(random.randint(10**12, 10**13 - 1))  # 13 digits
+            if not Product.objects.filter(barcode=code).exists():
+                return code
+
+    def _generate_barcode_image(self):
+        rv = io.BytesIO()
+        EAN13(self.barcode, writer=ImageWriter()).write(rv)
+        rv.seek(0)
+        filename = f"{self.pk}_{self.barcode}.png"
+        self.barcode_image.save(filename, File(rv), save=True)
     
     quantity = models.IntegerField(default=0)
     class Meta:
