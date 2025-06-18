@@ -8,7 +8,7 @@ __pycache__/
 venv/
 .env/
 .venv/
-src\grocery_store\.env
+src/grocery_store/.env
 
 # Django stuff
 *.pot
